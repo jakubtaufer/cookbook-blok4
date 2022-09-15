@@ -1,15 +1,15 @@
 import React, { useState, useMemo } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
+import Navbar from "react-bootstrap/Navbar";
 import Icon from "@mdi/react";
 import { mdiMagnify } from "@mdi/js";
 import ItemChange from "./ItemChange";
 import ItemTableList from "./ItemTableList";
 
-
 function ListItem(props) {
   const [viewType, setViewType] = useState("list");
-  const isToggled   = viewType === "list";
+  const isToggled = viewType === "list";
   const [searchBy, setSearchBy] = useState("");
 
   function toggler() {
@@ -25,7 +25,6 @@ function ListItem(props) {
     setSearchBy(event.target["searchInput"].value);
   }
 
-
   const filteredRecipes = useMemo(() => {
     return props.recipes.filter((input) => {
       return (
@@ -37,33 +36,39 @@ function ListItem(props) {
 
   return (
     <div>
+      <Navbar collapseOnSelect expand="sm" bg="light">
         <div className="container-fluid">
-          <Form className="d-flex" onSubmit={handleSearch}>
-            <Form.Control
-              id={"searchInput"}
-              style={{ maxWidth: "150px" }}
-              type="search"
-              placeholder="Vyhledat"
-              aria-label="Vyhledat"
-             
-            />
-            <Button
-              style={{ marginRight: "5px" }}
-              variant="outline-success"
-              type="submit"
-            >
-              <Icon size={1} path={mdiMagnify} />
-            </Button>
-            <Button variant="outline-primary" onClick={toggler}>
-              {isToggled ? "Tabulka" : "Recepty"}
-            </Button>
-          </Form>
+          <Navbar.Brand>Zoznam receptov</Navbar.Brand>
+          <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+          <Navbar.Collapse style={{ justifyContent: "right" }}>
+            <Form className="d-flex" onSubmit={handleSearch}>
+              <Form.Control
+                id={"searchInput"}
+                style={{ maxWidth: "150px" }}
+                type="search"
+                placeholder="Search"
+                aria-label="Search"
+              />
+              <Button
+                style={{ marginRight: "5px" }}
+                variant="outline-success"
+                type="submit"
+              >
+                <Icon size={1} path={mdiMagnify} />
+              </Button>
+              <Button
+                className={"d-none d-md-block"}
+                variant="outline-primary"
+                onClick={toggler}
+              >
+                {isToggled ? "Tabulka" : "Recepty"}
+              </Button>
+            </Form>
+          </Navbar.Collapse>
         </div>
+      </Navbar>
       {isToggled ? (
-        <ItemChange
-          recipes={filteredRecipes}
-          ingredients={props.ingredients}
-        />
+        <ItemChange recipes={filteredRecipes} ingredients={props.ingredients} />
       ) : (
         <ItemTableList recipes={filteredRecipes} />
       )}
@@ -72,6 +77,3 @@ function ListItem(props) {
 }
 
 export default ListItem;
-
-
-
