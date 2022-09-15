@@ -6,6 +6,7 @@ import Icon from "@mdi/react";
 import { mdiMagnify } from "@mdi/js";
 import ItemChange from "./ItemChange";
 import ItemTableList from "./ItemTableList";
+import RecipeModal from "./RecipeModal";
 
 function ListItem(props) {
   const [viewType, setViewType] = useState("list");
@@ -63,6 +64,11 @@ function ListItem(props) {
               >
                 {isToggled ? "Tabulka" : "Recepty"}
               </Button>
+              <RecipeModal
+              // recipe={props.recipe}
+              // subject={subject}
+              // classroom={props.classroom}
+              />
             </Form>
           </Navbar.Collapse>
         </div>
