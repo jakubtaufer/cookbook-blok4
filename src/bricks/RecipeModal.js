@@ -1,51 +1,47 @@
+import React, { useState } from "react";
+import { Modal, Form, ModalFooter } from "react-bootstrap";
+import Button from "react-bootstrap/Button";
 import Icon from "@mdi/react";
-import { mdiClipboardListOutline } from "@mdi/js";
-import { useState, useEffect } from "react";
-import { Modal, Form, Button, Row, Col } from "react-bootstrap";
+import { mdiLoading } from "@mdi/js";
 
-function RecipeModal() {
-  const [isModalShown, setShow] = useState(false);
+function RecipeModal(props) {
+  const ingredients = props.ingredients;
+  const [validated, setValidated] = useState(false);
+  const [recipeAddCall, setRecipeAddCall] = useState({ state: "inactive" });
+  const [isShown, setIsShown] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    imgUri: "",
-    amount: "",
-    unit: "",
-    ingredients: [
-      {
-        name: "",
-        amount: "",
-        unit: "",
-      },
-    ],
+    ingredients: [],
   });
 
-  // const [ingredientsLoadCall, setIngredientsLoadCall] = useState({
-  //   state: "pending",
-  // });
+  const defaultForm = {
+    name: "",
+    description: "",
+    ingredients: [],
+  };
 
-  // useEffect(() => {
-  //   fetch("http://localhost:8000/ingredient/list", { method: "GET" }).then(
-  //     async (response) => {
-  //       const responseJson = await response.json();
-  //       if (response.status >= 400) {
-  //         setIngredientsLoadCall({ state: "error", error: responseJson });
-  //       } else {
-  //         setIngredientsLoadCall({ state: "success", data: responseJson });
-  //       }
-  //     }
-  //   );
-  // }, []);
+  const emptyIngredient = () => {
+    return { amount: 0, unit: "", id: "" };
+  };
 
-  // function IngredientsOption() {
-  //   return ingredientList.map((ingredient) => {
-  //     return <option value={ingredient.id}>{ingredient.name} </option>;
-  //   });
-  // }
+  const addEmptyIngredient = () => {
+    const newFormData = {
+      ...formData,
+      ingredients: [...formData.ingredients, emptyIngredient()],
+    };
+    setFormData(newFormData);
+  };
 
-  // const ingredientList = ingredientsLoadCall.data;
-
-  // const handleClose = () => setAddGradeShow(false);
+  const sortedIngredientsList = ingredients.sort((a, b) => {
+    if (a.name < b.name) {
+      return -1;
+    }
+    if (a.name > b.name) {
+      return 1;
+    }
+    return 0;
+  });
 
   const setField = (name, val) => {
     return setFormData((formData) => {
@@ -55,99 +51,193 @@ function RecipeModal() {
     });
   };
 
-  const handleShowModal = () => setShow(true);
-  const handleCloseModal = () => setShow(false);
+  const setIngredientField = (inputName, val, index) => {
+    return setFormData((formData) => {
+      const newData = { ...formData };
+
+      newData.ingredients[index][inputName] = val;
+      return newData;
+    });
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
+    const form = e.currentTarget;
     const payload = {
       ...formData,
-      // studentId: student.id,
-      // subjectId: subject.id,
     };
 
-    console.log(payload);
+    if (!form.checkValidity()) {
+      setValidated(true);
+      return;
+    }
+
+    const res = await fetch(`recipe/create`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+
+    if (res.status >= 400) {
+      setRecipeAddCall({ state: "error", error: data });
+    } else {
+      setRecipeAddCall({ state: "success", data });
+      handleCloseModal();
+    }
+
+    e.preventDefault();
+
+    console.log(formData);
+  };
+
+  function removeIngredient(index) {
+    const newIngredients = [...formData.ingredients];
+    newIngredients.splice(index, 1);
+
+    const newFormData = {
+      ...formData,
+      ingredients: newIngredients,
+    };
+    setFormData(newFormData);
+  }
+
+  const handleShowModal = () => setIsShown(true);
+  const handleCloseModal = () => {
+    setFormData(defaultForm);
+    setIsShown(false);
+  };
+
+  const ingredienceInputGroup = (ingredient, index) => {
+    return (
+      <div key={index} className={"d-flex justify-content-center gap-1"}>
+        <Form.Group className="mb-1 w-75" controlId="ingredients">
+          <Form.Label>Ingdredience</Form.Label>
+          <Form.Select
+            value={ingredient.id}
+            onChange={(e) => setIngredientField("id", e.target.value, index)}
+          >
+            <option></option>
+            {sortedIngredientsList.map((item) => {
+              return (
+                <option key={item.id} value={item.id}>
+                  {item.name}
+                </option>
+              );
+            })}
+          </Form.Select>
+        </Form.Group>
+
+        <Form.Group className="mb-1" controlId="amount">
+          <Form.Label>Počet</Form.Label>
+          <Form.Control
+            type="number"
+            value={ingredient.amount}
+            onChange={(e) =>
+              setIngredientField("amount", parseInt(e.target.value), index)
+            }
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-1" controlId="unit">
+          <Form.Label>Jednotka</Form.Label>
+          <Form.Control
+            value={ingredient.unit}
+            onChange={(e) => setIngredientField("unit", e.target.value, index)}
+          />
+        </Form.Group>
+
+        <Button onClick={() => removeIngredient(index)}>X</Button>
+      </div>
+    );
   };
 
   return (
     <>
-      <Modal show={isModalShown} onHide={handleCloseModal}>
-        <Form onSubmit={(e) => handleSubmit(e)}>
-          <Modal.Header closeButton>
-            <Modal.Title>Přidat známku</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <Form.Group className="mb-3" controlId="formBasicEmail">
-              <Form.Label>Nazov</Form.Label>
+      <Modal show={isShown} onHide={handleCloseModal} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Nový recept</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form
+            noValidate
+            validated={validated}
+            id={"form"}
+            onSubmit={(e) => handleSubmit(e)}
+          >
+            <Form.Group className="mb-3" controlId="recipeName">
+              <Form.Label>Název</Form.Label>
               <Form.Control
-                type="text"
-                value={formData.name}
+                maxLength={60}
+                required
                 onChange={(e) => setField("name", e.target.value)}
               />
+              <Form.Control.Feedback type="invalid">
+                Zadejte název (maximální délka 60 znaků)
+              </Form.Control.Feedback>
             </Form.Group>
-            <Form.Group className="mb-3">
+
+            <Form.Group className="mb-3" controlId="description">
               <Form.Label>Postup</Form.Label>
               <Form.Control
+                required
                 as="textarea"
-                rows={3}
-                value={formData.description}
                 onChange={(e) => setField("description", e.target.value)}
               />
+              <Form.Control.Feedback type="invalid">
+                Zadejte popis
+              </Form.Control.Feedback>
             </Form.Group>
 
-            <Row>
-              <Form.Group as={Col} className="mb-3">
-                <Form.Label>Ingrediencie</Form.Label>
-                <Form.Select
-                  aria-label="Default select example"
-                  onChange={(e) => setField("ingredients", e.target.value)}
-                >
-                  <option value="Cibula">Cibula</option>
-                  <option value="Cesnak">Cesnak</option>
-                  <option value="Paprika">Paprika</option>
-                  {/* {IngredientsOption()} */}
-                </Form.Select>
-              </Form.Group>
-              <Form.Group as={Col} className="mb-3">
-                <Form.Label>Počet</Form.Label>
-                <Form.Control
-                  type="number"
-                  placeholder="1-5"
-                  value={formData.grade}
-                  onChange={(e) => setField("amount", parseInt(e.target.value))}
-                />
-              </Form.Group>
-              <Form.Group as={Col} className="mb-3">
-                <Form.Label>Jednotka</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={formData.unit}
-                  onChange={(e) => setField("unit", e.target.value)}
-                />
-              </Form.Group>
-            </Row>
-          </Modal.Body>
-          <Modal.Footer>
-            <div className="d-flex flex-row gap-2">
-              <Button variant="secondary" onClick={handleCloseModal}>
-                Zavřít
-              </Button>
-              <Button variant="primary" type="submit">
-                Vytvořit
-              </Button>
-            </div>
-          </Modal.Footer>
-        </Form>
-      </Modal>
+            {formData.ingredients.map((ing, index) => {
+              return ingredienceInputGroup(ing, index);
+            })}
 
-      <Icon
-        path={mdiClipboardListOutline}
-        style={{ color: "grey", cursor: "pointer" }}
-        size={1}
+            <Button onClick={addEmptyIngredient}>Přidej ingredienci</Button>
+
+            <Modal.Footer>
+              <div className="d-flex flex-row gap-2">
+                <div>
+                  {recipeAddCall.state === "error" && (
+                    <div className="text-danger">
+                      Error: {recipeAddCall.error.errorMessage}
+                    </div>
+                  )}
+                </div>
+                <Button
+                  variant="secondary"
+                  // size="lg"
+                  // className={"w-60"}
+                  onClick={handleCloseModal}
+                >
+                  Zavřít
+                </Button>
+                <Button
+                  variant="primary"
+                  type="submit"
+                  // size="lg"
+                  // className={"w-60"}
+                  disabled={recipeAddCall.state === "pending"}
+                >
+                  {recipeAddCall.state === "pending" ? (
+                    <Icon size={0.8} path={mdiLoading} spin={true} />
+                  ) : (
+                    "Vytvořit"
+                  )}
+                </Button>
+              </div>
+            </Modal.Footer>
+          </Form>
+        </Modal.Body>
+      </Modal>
+      <Button
         onClick={handleShowModal}
-      />
+        variant="success"
+        size="sm"
+        className={"w-30"}
+      >
+        Přidej recept
+      </Button>
     </>
   );
 }

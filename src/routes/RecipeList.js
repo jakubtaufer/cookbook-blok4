@@ -12,29 +12,25 @@ function RecipeList() {
   });
 
   useEffect(() => {
-    fetch("http://localhost:8000/recipe/list", { method: "GET" }).then(
-      async (response) => {
-        const responseJSON = await response.json();
-        if (response.status >= 400) {
-          setRecipesLoadCall({ state: "error", error: responseJSON });
-        } else {
-          setRecipesLoadCall({ state: "success", data: responseJSON });
-        }
+    fetch("recipe/list", { method: "GET" }).then(async (response) => {
+      const responseJSON = await response.json();
+      if (response.status >= 400) {
+        setRecipesLoadCall({ state: "error", error: responseJSON });
+      } else {
+        setRecipesLoadCall({ state: "success", data: responseJSON });
       }
-    );
+    });
   }, []);
 
   useEffect(() => {
-    fetch("http://localhost:8000/ingredient/list", { method: "GET" }).then(
-      async (response) => {
-        const responseJson = await response.json();
-        if (response.status >= 400) {
-          setIngredientsLoadCall({ state: "error", error: responseJson });
-        } else {
-          setIngredientsLoadCall({ state: "success", data: responseJson });
-        }
+    fetch("ingredient/list", { method: "GET" }).then(async (response) => {
+      const responseJson = await response.json();
+      if (response.status >= 400) {
+        setIngredientsLoadCall({ state: "error", error: responseJson });
+      } else {
+        setIngredientsLoadCall({ state: "success", data: responseJson });
       }
-    );
+    });
   }, []);
 
   function getChild() {
@@ -58,7 +54,7 @@ function RecipeList() {
     } else if (isLoaded) {
       return (
         <div className={styles.app}>
-          <h1>Najlepšie recepty</h1>
+          <h1>Nejlepší recepty</h1>
           <ListItem
             recipes={recipesLoadCall.data}
             ingredients={ingredientsLoadCall.data}

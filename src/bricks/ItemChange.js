@@ -19,7 +19,7 @@ function ItemChange(props) {
     <div>
       <div className="container-fluid">
         <Button variant="outline-primary" onClick={changeView}>
-          {isChange ? "Small detail" : "Large detail"}
+          {isChange ? "Zobrazit ingredience" : "Zobrazit postup"}
         </Button>
       </div>
 

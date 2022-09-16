@@ -39,7 +39,7 @@ function ListItem(props) {
     <div>
       <Navbar collapseOnSelect expand="sm" bg="light">
         <div className="container-fluid">
-          <Navbar.Brand>Zoznam receptov</Navbar.Brand>
+          <Navbar.Brand>Seznam receptů</Navbar.Brand>
           <Navbar.Toggle aria-controls="responsive-navbar-nav" />
           <Navbar.Collapse style={{ justifyContent: "right" }}>
             <Form className="d-flex" onSubmit={handleSearch}>
@@ -47,8 +47,8 @@ function ListItem(props) {
                 id={"searchInput"}
                 style={{ maxWidth: "150px" }}
                 type="search"
-                placeholder="Search"
-                aria-label="Search"
+                placeholder="Hledat"
+                aria-label="Hledat"
               />
               <Button
                 style={{ marginRight: "5px" }}
@@ -64,11 +64,7 @@ function ListItem(props) {
               >
                 {isToggled ? "Tabulka" : "Recepty"}
               </Button>
-              <RecipeModal
-              // recipe={props.recipe}
-              // subject={subject}
-              // classroom={props.classroom}
-              />
+              <RecipeModal ingredients={props.ingredients} />
             </Form>
           </Navbar.Collapse>
         </div>

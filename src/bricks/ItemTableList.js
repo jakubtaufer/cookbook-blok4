@@ -6,7 +6,7 @@ function ItemTableList(props) {
     <Table>
       <thead>
         <tr>
-          <th>Názov</th>
+          <th>Název</th>
           <th>Popis</th>
         </tr>
       </thead>

@@ -16,11 +16,9 @@ function addNames(rIngredients, inList) {
 function Ingredientview(props) {
   const namesIngredientList = addNames(
     props.recipe.ingredients,
-    props.ingredient
+    props.ingredients
   );
-  console.log(props.ingredient);
-  console.log(props.recipe.ingredients);
-  console.log(namesIngredientList);
+
   return (
     <div style={{ float: "left" }}>
       <Card className={styles.card}>
@@ -44,16 +42,3 @@ function Ingredientview(props) {
 }
 
 export default Ingredientview;
-
-{
-  /* <tbody>
-  {props.recipes.map((recipe) => {
-    return (
-      <tr key={recipe.id}>
-        <td>{recipe.name}</td>
-        <td>{recipe.description}</td>
-      </tr>
-    );
-  })}
-</tbody>; */
-}
