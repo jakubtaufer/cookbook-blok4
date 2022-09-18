@@ -1,12 +1,12 @@
 import React from "react";
-import Ingredientview from "./Ingredientview";
+import RecipeIngredientView from "./RecipeIngredientView";
 
 function IngredientMap(props) {
   const ingredients = props.ingredients;
 
   return props.recipes.map((recipe) => {
     return (
-      <Ingredientview
+      <RecipeIngredientView
         key={recipe.id}
         recipe={recipe}
         ingredients={ingredients}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Icon from "@mdi/react";
 import { mdiLoading } from "@mdi/js";
-import ListItem from "../bricks/ListItem";
+import RecipesList from "../bricks/RecipesList";
 import styles from "../css/App.module.css";
 
 function RecipeList() {
@@ -55,7 +55,7 @@ function RecipeList() {
       return (
         <div className={styles.app}>
           <h1>Nejlepší recepty</h1>
-          <ListItem
+          <RecipesList
             recipes={recipesLoadCall.data}
             ingredients={ingredientsLoadCall.data}
           />

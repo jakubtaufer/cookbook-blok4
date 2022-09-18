@@ -1,7 +1,7 @@
 import React from "react";
 import Table from "react-bootstrap/Table";
 
-function ItemTableList(props) {
+function RecipesTable(props) {
   return (
     <Table>
       <thead>
@@ -24,4 +24,4 @@ function ItemTableList(props) {
   );
 }
 
-export default ItemTableList;
+export default RecipesTable;

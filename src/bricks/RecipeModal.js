@@ -1,14 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Form, ModalFooter } from "react-bootstrap";
 import Button from "react-bootstrap/Button";
 import Icon from "@mdi/react";
-import { mdiLoading } from "@mdi/js";
+import { mdiLoading, mdiPencilOutline } from "@mdi/js";
 
 function RecipeModal(props) {
+  const recipes = props.recipes;
+  const onComplete = props.onComplete;
   const ingredients = props.ingredients;
   const [validated, setValidated] = useState(false);
   const [recipeAddCall, setRecipeAddCall] = useState({ state: "inactive" });
-  const [isShown, setIsShown] = useState(false);
+  const [isShown, setIsShown] = useState({ state: false });
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -20,6 +22,16 @@ function RecipeModal(props) {
     description: "",
     ingredients: [],
   };
+
+  useEffect(() => {
+    if (recipes) {
+      setFormData({
+        name: recipes.name,
+        description: recipes.description,
+        ingredients: recipes.ingredients,
+      });
+    }
+  }, [recipes]);
 
   const emptyIngredient = () => {
     return { amount: 0, unit: "", id: "" };
@@ -62,16 +74,21 @@ function RecipeModal(props) {
 
   const handleSubmit = async (e) => {
     const form = e.currentTarget;
-    const payload = {
-      ...formData,
-    };
-
+    e.preventDefault();
     if (!form.checkValidity()) {
       setValidated(true);
       return;
     }
 
-    const res = await fetch(`recipe/create`, {
+    const newData = { ...formData };
+    newData.ingredients.forEach((ing) => {
+      ing.amount = parseFloat(ing.amount);
+    });
+
+    const payload = { ...newData, id: recipes ? recipes.id : null };
+
+    setRecipeAddCall({ state: "pending" });
+    const res = await fetch(`recipe/${recipes ? "update" : "create"}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -82,11 +99,15 @@ function RecipeModal(props) {
     if (res.status >= 400) {
       setRecipeAddCall({ state: "error", error: data });
     } else {
+      console.log(data);
       setRecipeAddCall({ state: "success", data });
-      handleCloseModal();
     }
 
-    e.preventDefault();
+    if (typeof onComplete === "function") {
+      onComplete(data);
+    }
+
+    handleCloseModal();
 
     console.log(formData);
   };
@@ -102,13 +123,15 @@ function RecipeModal(props) {
     setFormData(newFormData);
   }
 
-  const handleShowModal = () => setIsShown(true);
+  const handleShowModal = (data) => setIsShown({ state: true, data });
   const handleCloseModal = () => {
     setFormData(defaultForm);
-    setIsShown(false);
+    setIsShown({ state: false });
+    setRecipeAddCall({ state: "inactive" });
+    setValidated(false);
   };
 
-  const ingredienceInputGroup = (ingredient, index) => {
+  const ingredientInputGroup = (ingredient, index) => {
     return (
       <div key={index} className={"d-flex justify-content-center gap-1"}>
         <Form.Group className="mb-1 w-75" controlId="ingredients">
@@ -154,9 +177,9 @@ function RecipeModal(props) {
 
   return (
     <>
-      <Modal show={isShown} onHide={handleCloseModal} size="lg">
+      <Modal show={isShown.state} onHide={handleCloseModal} size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>Nový recept</Modal.Title>
+          <Modal.Title>{recipes ? "Změna receptu" : "Nový recept"}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form
@@ -168,6 +191,7 @@ function RecipeModal(props) {
             <Form.Group className="mb-3" controlId="recipeName">
               <Form.Label>Název</Form.Label>
               <Form.Control
+                value={formData.name}
                 maxLength={60}
                 required
                 onChange={(e) => setField("name", e.target.value)}
@@ -180,6 +204,7 @@ function RecipeModal(props) {
             <Form.Group className="mb-3" controlId="description">
               <Form.Label>Postup</Form.Label>
               <Form.Control
+                value={formData.description}
                 required
                 as="textarea"
                 onChange={(e) => setField("description", e.target.value)}
@@ -190,7 +215,7 @@ function RecipeModal(props) {
             </Form.Group>
 
             {formData.ingredients.map((ing, index) => {
-              return ingredienceInputGroup(ing, index);
+              return ingredientInputGroup(ing, index);
             })}
 
             <Button onClick={addEmptyIngredient}>Přidej ingredienci</Button>
@@ -221,8 +246,10 @@ function RecipeModal(props) {
                 >
                   {recipeAddCall.state === "pending" ? (
                     <Icon size={0.8} path={mdiLoading} spin={true} />
+                  ) : recipes ? (
+                    "Změnit"
                   ) : (
-                    "Vytvořit"
+                    "Přidat"
                   )}
                 </Button>
               </div>
@@ -230,14 +257,23 @@ function RecipeModal(props) {
           </Form>
         </Modal.Body>
       </Modal>
-      <Button
-        onClick={handleShowModal}
-        variant="success"
-        size="sm"
-        className={"w-30"}
-      >
-        Přidej recept
-      </Button>
+
+      {recipes ? (
+        <div className={"d-flex w-100 justify-content-end"}>
+          <Button onClick={handleShowModal} variant={"light"} size={"sm"}>
+            <Icon size={1} path={mdiPencilOutline} />
+          </Button>
+        </div>
+      ) : (
+        <Button
+          onClick={handleShowModal}
+          variant="success"
+          size="sm"
+          className={"w-30"}
+        >
+          Přidej recept
+        </Button>
+      )}
     </>
   );
 }

@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import Button from "react-bootstrap/Button";
-import ItemGridList from "./ItemGridList";
+import RecipeDescriptionView from "./RecipeDescriptionView";
 import IngredientMap from "./IngredientMap";
 
-function ItemChange(props) {
+function ViewChange(props) {
   const [viewType, setViewType] = useState("");
   const isChange = viewType === "++";
 
@@ -24,7 +24,7 @@ function ItemChange(props) {
       </div>
 
       {isChange ? (
-        <ItemGridList recipes={props.recipes} />
+        <RecipeDescriptionView recipes={props.recipes} />
       ) : (
         <IngredientMap
           recipes={props.recipes}
@@ -35,4 +35,4 @@ function ItemChange(props) {
   );
 }
 
-export default ItemChange;
+export default ViewChange;

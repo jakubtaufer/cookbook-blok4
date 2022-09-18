@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Icon from "@mdi/react";
 import { mdiLoading } from "@mdi/js";
-import ListItem from "./bricks/ListItem";
+import RecipesList from "./bricks/RecipesList";
 import styles from "./css/App.module.css";
 
 import { Outlet, useNavigate } from "react-router-dom";

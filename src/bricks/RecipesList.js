@@ -4,14 +4,15 @@ import Form from "react-bootstrap/Form";
 import Navbar from "react-bootstrap/Navbar";
 import Icon from "@mdi/react";
 import { mdiMagnify } from "@mdi/js";
-import ItemChange from "./ItemChange";
-import ItemTableList from "./ItemTableList";
+import ViewChange from "./ViewChange";
+import RecipesTable from "./RecipesTable";
 import RecipeModal from "./RecipeModal";
 
-function ListItem(props) {
+function RecipesList(props) {
   const [viewType, setViewType] = useState("list");
   const isToggled = viewType === "list";
   const [searchBy, setSearchBy] = useState("");
+  const [recipesList, setRecipesList] = useState(props.recipes);
 
   function toggler() {
     if (isToggled) {
@@ -27,13 +28,18 @@ function ListItem(props) {
   }
 
   const filteredRecipes = useMemo(() => {
-    return props.recipes.filter((input) => {
+    return recipesList.filter((input) => {
       return (
         input.name.toLowerCase().includes(searchBy.toLowerCase()) ||
         input.description.toLowerCase().includes(searchBy.toLowerCase())
       );
     });
-  }, [searchBy, props.recipes]);
+  }, [searchBy, recipesList]);
+
+  const callOnComplete = (data) => {
+    const newRecipesList = [...props.recipes, data];
+    setRecipesList(newRecipesList);
+  };
 
   return (
     <div>
@@ -64,18 +70,21 @@ function ListItem(props) {
               >
                 {isToggled ? "Tabulka" : "Recepty"}
               </Button>
-              <RecipeModal ingredients={props.ingredients} />
             </Form>
           </Navbar.Collapse>
+          <RecipeModal
+            ingredients={props.ingredients}
+            onComplete={callOnComplete}
+          />
         </div>
       </Navbar>
       {isToggled ? (
-        <ItemChange recipes={filteredRecipes} ingredients={props.ingredients} />
+        <ViewChange recipes={filteredRecipes} ingredients={props.ingredients} />
       ) : (
-        <ItemTableList recipes={filteredRecipes} />
+        <RecipesTable recipes={filteredRecipes} />
       )}
     </div>
   );
 }
 
-export default ListItem;
+export default RecipesList;
