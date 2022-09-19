@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Modal, Form, ModalFooter } from "react-bootstrap";
 import Button from "react-bootstrap/Button";
 import Icon from "@mdi/react";
 import { mdiLoading, mdiPencilOutline } from "@mdi/js";
 
 function RecipeModal(props) {
-  const recipes = props.recipes;
+  const recipe = props.recipes;
   const onComplete = props.onComplete;
   const ingredients = props.ingredients;
   const [validated, setValidated] = useState(false);
   const [recipeAddCall, setRecipeAddCall] = useState({ state: "inactive" });
   const [isShown, setIsShown] = useState({ state: false });
   const [formData, setFormData] = useState({
-    name: "",
+    name: "ahoj",
     description: "",
     ingredients: [],
   });
@@ -24,14 +24,14 @@ function RecipeModal(props) {
   };
 
   useEffect(() => {
-    if (recipes) {
+    if (recipe) {
       setFormData({
-        name: recipes.name,
-        description: recipes.description,
-        ingredients: recipes.ingredients,
+        name: recipe.name,
+        description: recipe.description,
+        ingredients: recipe.ingredients,
       });
-    }
-  }, [recipes]);
+    } else setFormData(defaultForm);
+  }, [recipe, isShown]);
 
   const emptyIngredient = () => {
     return { amount: 0, unit: "", id: "" };
@@ -74,7 +74,7 @@ function RecipeModal(props) {
 
   const handleSubmit = async (e) => {
     const form = e.currentTarget;
-    e.preventDefault();
+    // e.preventDefault();
     if (!form.checkValidity()) {
       setValidated(true);
       return;
@@ -85,10 +85,10 @@ function RecipeModal(props) {
       ing.amount = parseFloat(ing.amount);
     });
 
-    const payload = { ...newData, id: recipes ? recipes.id : null };
+    const payload = { ...newData, id: recipe ? recipe.id : null };
 
     setRecipeAddCall({ state: "pending" });
-    const res = await fetch(`recipe/${recipes ? "update" : "create"}`, {
+    const res = await fetch(`recipe/${recipe ? "update" : "create"}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -125,7 +125,6 @@ function RecipeModal(props) {
 
   const handleShowModal = (data) => setIsShown({ state: true, data });
   const handleCloseModal = () => {
-    setFormData(defaultForm);
     setIsShown({ state: false });
     setRecipeAddCall({ state: "inactive" });
     setValidated(false);
@@ -134,8 +133,7 @@ function RecipeModal(props) {
   const ingredientInputGroup = (ingredient, index) => {
     return (
       <div key={index} className={"d-flex justify-content-center gap-1"}>
-        <Form.Group className="mb-1 w-75" controlId="ingredients">
-          <Form.Label>Ingdredience</Form.Label>
+        <Form.Group className="mb-2 w-75" controlId="ingredients">
           <Form.Select
             value={ingredient.id}
             onChange={(e) => setIngredientField("id", e.target.value, index)}
@@ -152,7 +150,6 @@ function RecipeModal(props) {
         </Form.Group>
 
         <Form.Group className="mb-1" controlId="amount">
-          <Form.Label>Počet</Form.Label>
           <Form.Control
             type="number"
             value={ingredient.amount}
@@ -163,14 +160,20 @@ function RecipeModal(props) {
         </Form.Group>
 
         <Form.Group className="mb-1" controlId="unit">
-          <Form.Label>Jednotka</Form.Label>
           <Form.Control
+            placeholder="jednotka"
             value={ingredient.unit}
             onChange={(e) => setIngredientField("unit", e.target.value, index)}
           />
         </Form.Group>
-
-        <Button onClick={() => removeIngredient(index)}>X</Button>
+        <div className={"mb-2"}>
+          <Button
+            variant={"outline-danger"}
+            onClick={() => removeIngredient(index)}
+          >
+            X
+          </Button>
+        </div>
       </div>
     );
   };
@@ -179,7 +182,7 @@ function RecipeModal(props) {
     <>
       <Modal show={isShown.state} onHide={handleCloseModal} size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>{recipes ? "Změna receptu" : "Nový recept"}</Modal.Title>
+          <Modal.Title>{recipe ? "Změna receptu" : "Nový recept"}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form
@@ -213,10 +216,12 @@ function RecipeModal(props) {
                 Zadejte popis
               </Form.Control.Feedback>
             </Form.Group>
-
-            {formData.ingredients.map((ing, index) => {
-              return ingredientInputGroup(ing, index);
-            })}
+            <div className={"d-flex flex-column"}>
+              <Form.Label>Ingredience</Form.Label>
+              {formData.ingredients.map((ing, index) => {
+                return ingredientInputGroup(ing, index);
+              })}
+            </div>
 
             <Button onClick={addEmptyIngredient}>Přidej ingredienci</Button>
 
@@ -229,24 +234,17 @@ function RecipeModal(props) {
                     </div>
                   )}
                 </div>
-                <Button
-                  variant="secondary"
-                  // size="lg"
-                  // className={"w-60"}
-                  onClick={handleCloseModal}
-                >
+                <Button variant="secondary" onClick={handleCloseModal}>
                   Zavřít
                 </Button>
                 <Button
                   variant="primary"
                   type="submit"
-                  // size="lg"
-                  // className={"w-60"}
                   disabled={recipeAddCall.state === "pending"}
                 >
                   {recipeAddCall.state === "pending" ? (
                     <Icon size={0.8} path={mdiLoading} spin={true} />
-                  ) : recipes ? (
+                  ) : recipe ? (
                     "Změnit"
                   ) : (
                     "Přidat"
@@ -258,18 +256,18 @@ function RecipeModal(props) {
         </Modal.Body>
       </Modal>
 
-      {recipes ? (
-        <div className={"d-flex w-100 justify-content-end"}>
+      {recipe ? (
+        <div className={"d-flex w-100 justify-content-center"}>
           <Button onClick={handleShowModal} variant={"light"} size={"sm"}>
+            Upravit
             <Icon size={1} path={mdiPencilOutline} />
           </Button>
         </div>
       ) : (
         <Button
+          className={"d-none d-md-block"}
+          variant="outline-primary"
           onClick={handleShowModal}
-          variant="success"
-          size="sm"
-          className={"w-30"}
         >
           Přidej recept
         </Button>

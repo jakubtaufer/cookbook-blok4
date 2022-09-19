@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import Card from "react-bootstrap/Card";
 import styles from "../css/Card.css";
 import RecipeModal from "./RecipeModal";
+import UserContext from "../UserProvider";
 
 function RecipeIngredientView(props) {
-  const ingredientsList = props.ingredients;
   const [recipeData, setRecipeData] = useState(props.recipe);
+  const isAuthorized = useContext(UserContext);
 
   const callOnComplete = (recipe) => {
     setRecipeData(recipe);
@@ -32,16 +33,20 @@ function RecipeIngredientView(props) {
       <Card className={styles.card}>
         <Card.Img src={props.recipe.imgUri} />
         <Card.Title>{props.recipe.name}</Card.Title>
-        <RecipeModal
-          ingredients={props.ingredients}
-          recipes={recipeData}
-          onComplete={callOnComplete}
-        />
 
         <Card.Body>
           <Card.Text style={{ textAlign: "left" }} className="text-truncate">
             {props.recipe.description}
           </Card.Text>
+          {isAuthorized ? (
+            <RecipeModal
+              ingredients={props.ingredients}
+              onComplete={callOnComplete}
+              recipes={recipeData}
+            />
+          ) : (
+            <div></div>
+          )}
           <div>
             <ul>
               {namesIngredientList.map((recipe) => {

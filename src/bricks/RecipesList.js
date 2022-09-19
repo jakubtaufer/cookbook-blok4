@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useContext } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Navbar from "react-bootstrap/Navbar";
@@ -7,12 +7,15 @@ import { mdiMagnify } from "@mdi/js";
 import ViewChange from "./ViewChange";
 import RecipesTable from "./RecipesTable";
 import RecipeModal from "./RecipeModal";
+import UserContext from "../UserProvider";
 
 function RecipesList(props) {
   const [viewType, setViewType] = useState("list");
   const isToggled = viewType === "list";
   const [searchBy, setSearchBy] = useState("");
   const [recipesList, setRecipesList] = useState(props.recipes);
+
+  const isAuthorized = useContext(UserContext);
 
   function toggler() {
     if (isToggled) {
@@ -72,10 +75,14 @@ function RecipesList(props) {
               </Button>
             </Form>
           </Navbar.Collapse>
-          <RecipeModal
-            ingredients={props.ingredients}
-            onComplete={callOnComplete}
-          />
+          {isAuthorized ? (
+            <RecipeModal
+              ingredients={props.ingredients}
+              onComplete={callOnComplete}
+            />
+          ) : (
+            <div></div>
+          )}
         </div>
       </Navbar>
       {isToggled ? (
