@@ -15,7 +15,7 @@ function RecipesList(props) {
   const [searchBy, setSearchBy] = useState("");
   const [recipesList, setRecipesList] = useState(props.recipes);
 
-  const isAuthorized = useContext(UserContext);
+  const { isAuthorized } = useContext(UserContext);
 
   function toggler() {
     if (isToggled) {
@@ -75,13 +75,11 @@ function RecipesList(props) {
               </Button>
             </Form>
           </Navbar.Collapse>
-          {isAuthorized ? (
+          {isAuthorized && (
             <RecipeModal
               ingredients={props.ingredients}
               onComplete={callOnComplete}
             />
-          ) : (
-            <div></div>
           )}
         </div>
       </Navbar>

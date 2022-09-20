@@ -6,7 +6,7 @@ import UserContext from "../UserProvider";
 
 function RecipeIngredientView(props) {
   const [recipeData, setRecipeData] = useState(props.recipe);
-  const isAuthorized = useContext(UserContext);
+  const { isAuthorized } = useContext(UserContext);
 
   const callOnComplete = (recipe) => {
     setRecipeData(recipe);
@@ -38,14 +38,12 @@ function RecipeIngredientView(props) {
           <Card.Text style={{ textAlign: "left" }} className="text-truncate">
             {props.recipe.description}
           </Card.Text>
-          {isAuthorized ? (
+          {isAuthorized && (
             <RecipeModal
               ingredients={props.ingredients}
               onComplete={callOnComplete}
               recipes={recipeData}
             />
-          ) : (
-            <div></div>
           )}
           <div>
             <ul>
